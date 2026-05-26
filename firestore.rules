@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function verifiedGmail() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@gmail\\.com$');
+    }
+
+    function ownsUserDoc(userId) {
+      return verifiedGmail() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if ownsUserDoc(userId);
+      allow delete: if false;
+
+      match /tasks/{taskId} {
+        allow read, delete: if ownsUserDoc(userId);
+        allow create, update: if ownsUserDoc(userId)
+          && (!('ownerId' in request.resource.data) || request.resource.data.ownerId == request.auth.uid);
+      }
+
+      match /reports/{reportId} {
+        allow read, create, update: if ownsUserDoc(userId);
+        allow delete: if ownsUserDoc(userId);
+      }
+    }
+
+    match /community/{roomId}/messages/{messageId} {
+      allow read: if verifiedGmail();
+      allow create: if verifiedGmail()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 2000;
+      allow update, delete: if false;
+    }
+
+    match /adminReports/{reportId} {
+      allow read, write: if verifiedGmail()
+        && request.auth.token.admin == true;
+    }
+  }
+}

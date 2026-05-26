@@ -1,19 +1,14 @@
- <div class="app">
-    <header>
-      <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <div style="font-weight:800; letter-spacing:.3px">Smart To‑Do</div>
-          <div style="font-size:12px; color:var(--muted)">Fast • Smart • Matrix • Alerts</div>
-        </div>
-      </div>
-      <div class="toolbar">
-        <button id="themeBtn" class="btn">🌗 Theme</button>
-        <button id="exportBtn" class="btn">⬇️ Export JSON</button>
-        <label class="btn ghost" for="importFile">⬆️ Import
-          <input id="importFile" type="file" accept="application/json" style="display:none" />
-        </label>
-        <button id="clearBtn" class="btn danger">🧹 Reset Data</button>
-        <span id="nextUp" class="pill" title="Next upcoming task"></span>
-      </div>
-    </header>
+<header class="topbar">
+  <div>
+    <p class="eyebrow">Command center</p>
+    <h1>Plan the right work, at the right time.</h1>
+  </div>
+  <div class="toolbar">
+    <button id="themeBtn" class="btn">Theme</button>
+    <button id="exportBtn" class="btn">Export</button>
+    <label class="btn ghost" for="importFile">Import
+      <input id="importFile" type="file" accept="application/json" hidden />
+    </label>
+    <button id="clearBtn" class="btn danger">Reset</button>
+  </div>
+</header>

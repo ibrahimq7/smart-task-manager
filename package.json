@@ -1,0 +1,16 @@
+{
+  "name": "smart-todo",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "vercel dev",
+    "backend-send-reminders": "node backend/sendReminders.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "nodemailer": "^6.9.0"
+  }
+}

@@ -1,156 +1,356 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart To‑Do – Advanced</title>
+  <title>Smart Todo Studio</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body>
-  <div class="app">
-    <header>
+  <section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-copy">
+        <p class="eyebrow">Secure workspace</p>
+        <h1>Welcome back to your work command center.</h1>
+        <p class="auth-subtitle">Plan priorities, collaborate with your team, and keep every project moving from one focused workspace.</p>
+        <div class="auth-bento">
+          <span>Focused planning</span>
+          <span>Team updates</span>
+          <span>Progress reports</span>
+          <span>Private workspace</span>
+        </div>
+      </div>
+      <div class="auth-panel">
+        <div class="logo auth-logo" aria-hidden="true">S</div>
+        <h2>Access Smart Todo</h2>
+        <p id="authMessage" class="auth-message">Continue with your Gmail account to open your workspace.</p>
+        <button id="googleSignInBtn" class="btn primary auth-btn">Continue with Google</button>
+        <div class="auth-divider">or verify by email</div>
+        <input id="authEmail" class="input" type="email" autocomplete="email" placeholder="yourname@gmail.com" />
+        <input id="authPassword" class="input" type="password" autocomplete="current-password" placeholder="Password" />
+        <div class="auth-actions">
+          <button id="emailSignInBtn" class="btn">Sign in</button>
+          <button id="emailSignUpBtn" class="btn ghost">Sign up</button>
+        </div>
+        <button id="passwordResetBtn" class="link-btn">Forgot password?</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell hidden">
+    <aside class="sidebar">
       <div class="brand">
-        <div class="logo"></div>
+        <div class="logo" aria-hidden="true">S</div>
         <div>
-          <div style="font-weight:800; letter-spacing:.3px">Smart To‑Do</div>
-          <div style="font-size:12px; color:var(--muted)">Fast • Smart • Matrix • Alerts</div>
+          <strong>Smart Todo</strong>
+          <span>Planner and focus system</span>
         </div>
       </div>
-      <div class="toolbar">
-        <button id="themeBtn" class="btn">🌗 Theme</button>
-        <button id="exportBtn" class="btn">⬇️ Export JSON</button>
-        <label class="btn ghost" for="importFile">⬆️ Import
-          <input id="importFile" type="file" accept="application/json" style="display:none" />
-        </label>
-        <button id="clearBtn" class="btn danger">🧹 Reset Data</button>
-        <span id="nextUp" class="pill" title="Next upcoming task"></span>
-      </div>
-    </header>
 
-    <!-- Controls -->
-    <div class="grid layout">
-      <section class="card">
-        <div class="hd"><strong>Add / Edit Task</strong><span class="pill">Eisenhower + Alerts</span></div>
-        <div class="bd">
-          <div class="row">
-            <input id="title" class="input" placeholder="Task title" />
-          </div>
-          <div class="row">
-            <input id="due" class="input" type="datetime-local" />
-            <select id="section" class="input"></select>
-            <select id="category" class="input">
-              <option value="General" style="color: black;">General</option>
-              <option value="Work" style="color: black;">Work</option>
-              <option value="College" style="color: black;">College</option>
-              <option value="Diet" style="color: black;">Diet</option>
-            </select>
-          </div>
-          <div class="row">
-            <select id="notify" class="input">
-              <option value="0" style="color: black;">No pre‑alert</option>
-              <option value="5" style="color: black;">5 min before</option>
-              <option value="10" selected style="color: black;">10 min before</option>
-              <option value="15" style="color: black;">15 min before</option>
-              <option value="20" style="color: black;">20 min before</option>
-              <option value="30" style="color: black;">30 min before</option>
-              <option value="60" style="color: black;">1 hour before</option>
-            </select>
-            <select id="repeat" class="input" title="Recurrence">
-              <option value="none" selected style="color: black;">One‑time</option>
-              <option value="daily" style="color: black;">Daily</option>
-              <option value="weekly" style="color: black;">Weekly</option>
-              <option value="custom" style="color: black;">Custom interval (mins)</option>
-            </select>
-            <input id="repeatEvery" class="input" type="number" min="1" placeholder="Interval in minutes (if custom)" />
-          </div>
-          <div class="row">
-            <select id="importance" class="input">
-              <option value="1" style="color: black;">Important</option>
-              <option value="0" style="color: black;">Not Important</option>
-            </select>
-            <select id="urgency" class="input">
-              <option value="1" style="color: black;">Urgent</option>
-              <option value="0" style="color: black;">Not Urgent</option>
-            </select>
-            <button id="saveBtn" class="btn primary">➕ Save Task</button>
-          </div>
+      <nav class="nav-stack" aria-label="Workspace">
+        <button class="nav-item active" data-view="all">Today Board</button>
+        <button class="nav-item" data-view="focus">Focus Queue</button>
+        <button class="nav-item" data-view="community">Community</button>
+        <button class="nav-item" data-view="calendar">Calendar</button>
+        <button class="nav-item" data-view="matrix">Priority Matrix</button>
+      </nav>
+
+      <section class="side-panel">
+        <div class="panel-title">
+          <span>Sections</span>
+          <span id="sectionCount" class="count-pill"></span>
+        </div>
+        <div id="sections" class="section-list"></div>
+        <div class="section-create">
+          <input id="newSectionName" class="input compact" placeholder="New section" />
+          <button id="addSectionBtn" class="icon-btn" title="Add section">+</button>
         </div>
       </section>
 
-      <section class="grid" style="gap:12px">
-        <div class="card">
-          <div class="hd"><strong>Tasks</strong>
-            <div class="row">
-              <select id="filterSection" class="input"></select>
-              <input id="search" class="input" placeholder="Search…" />
+      <section class="side-panel habit-panel">
+        <div class="panel-title">
+          <span>Habit Nudges</span>
+          <span id="waterStatus" class="count-pill">Off</span>
+        </div>
+        <label class="field-label" for="waterInterval">Water interval</label>
+        <div class="inline-controls">
+          <input id="waterInterval" class="input compact" type="number" min="10" value="60" />
+          <button id="startWater" class="icon-btn" title="Start">Start</button>
+          <button id="stopWater" class="icon-btn ghost" title="Stop">Stop</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Command center</p>
+          <h1>Plan the right work, at the right time.</h1>
+        </div>
+        <div class="toolbar">
+          <span id="userBadge" class="count-pill"></span>
+          <button id="themeBtn" class="btn">Theme</button>
+          <button id="exportBtn" class="btn">Export</button>
+          <label class="btn ghost" for="importFile">Import
+            <input id="importFile" type="file" accept="application/json" hidden />
+          </label>
+          <button id="signOutBtn" class="btn ghost">Sign out</button>
+          <button id="clearBtn" class="btn danger">Reset</button>
+        </div>
+      </header>
+
+      <section class="quick-add">
+        <div class="quick-copy">
+          <span id="currentDate"></span>
+          <strong id="nextUp">No upcoming tasks</strong>
+        </div>
+        <div class="quick-row">
+          <input id="quickAdd" class="input quick-input" placeholder="Quick add: Design landing page tomorrow 4pm #Work !high 45m" />
+          <button id="quickAddBtn" class="btn primary">Add</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Productivity overview">
+        <article class="stat-card">
+          <span>Total open</span>
+          <strong id="statOpen">0</strong>
+        </article>
+        <article class="stat-card warning">
+          <span>Due today</span>
+          <strong id="statToday">0</strong>
+        </article>
+        <article class="stat-card danger">
+          <span>Overdue</span>
+          <strong id="statOverdue">0</strong>
+        </article>
+        <article class="stat-card success">
+          <span>Focus load</span>
+          <strong id="statFocus">0m</strong>
+        </article>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel composer-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Task builder</p>
+              <h2 id="formTitle">Add task</h2>
             </div>
+            <button id="cancelEditBtn" class="btn ghost hidden">Cancel edit</button>
           </div>
-          <div class="bd" id="taskList" style="display:grid; gap:8px"></div>
-        </div>
-        <div class="card">
-          <div class="hd"><strong>Calendar</strong>
-            <div class="cal-nav">
-              <button id="prevMonth" class="btn">◀</button>
-              <div id="calLabel"></div>
-              <button id="nextMonth" class="btn">▶</button>
+
+          <div class="form-grid">
+            <label class="field span-2">
+              <span class="field-label">Title</span>
+              <input id="title" class="input" placeholder="What needs to happen?" />
+            </label>
+            <label class="field">
+              <span class="field-label">Due</span>
+              <input id="due" class="input" type="datetime-local" />
+            </label>
+            <label class="field">
+              <span class="field-label">Section</span>
+              <select id="section" class="input"></select>
+            </label>
+            <label class="field">
+              <span class="field-label">Category</span>
+              <select id="category" class="input">
+                <option value="General">General</option>
+                <option value="Work">Work</option>
+                <option value="Study">Study</option>
+                <option value="Health">Health</option>
+                <option value="Personal">Personal</option>
+                <option value="Meal">Meal</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Priority</span>
+              <select id="priority" class="input">
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Estimate</span>
+              <input id="estimate" class="input" type="number" min="5" step="5" placeholder="Minutes" />
+            </label>
+            <label class="field">
+              <span class="field-label">Energy</span>
+              <select id="energy" class="input">
+                <option value="deep">Deep work</option>
+                <option value="normal" selected>Normal</option>
+                <option value="light">Light admin</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Alert</span>
+              <select id="notify" class="input">
+                <option value="0">No alert</option>
+                <option value="5">5 min before</option>
+                <option value="10" selected>10 min before</option>
+                <option value="15">15 min before</option>
+                <option value="30">30 min before</option>
+                <option value="60">1 hour before</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Repeat</span>
+              <select id="repeat" class="input">
+                <option value="none" selected>One time</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="custom">Custom minutes</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Custom interval</span>
+              <input id="repeatEvery" class="input" type="number" min="1" placeholder="Minutes" />
+            </label>
+            <label class="field">
+              <span class="field-label">Importance</span>
+              <select id="importance" class="input">
+                <option value="1">Important</option>
+                <option value="0">Not important</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Urgency</span>
+              <select id="urgency" class="input">
+                <option value="1">Urgent</option>
+                <option value="0">Not urgent</option>
+              </select>
+            </label>
+            <label class="field span-2">
+              <span class="field-label">Notes</span>
+              <textarea id="notes" class="input" rows="3" placeholder="Context, links, or next action"></textarea>
+            </label>
+            <button id="saveBtn" class="btn primary span-2">Save task</button>
+          </div>
+        </section>
+
+        <section class="panel task-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Live list</p>
+              <h2>Tasks</h2>
             </div>
+            <button id="clearDateBtn" class="btn ghost hidden">Clear date</button>
           </div>
-          <div class="bd calendar">
-            <div class="cal-grid" id="calHead"></div>
-            <div class="cal-grid" id="calGrid"></div>
-          </div>
-        </div>
-      </section>
-    </div>
 
-    <!-- Matrix -->
-    <section class="card">
-      <div class="hd"><strong>Eisenhower Matrix</strong>
-        <div class="mx-badges">
-          <span class="pill">Rows: Important / Not Important</span>
-          <span class="pill">Cols: Urgent / Not Urgent</span>
-          <span class="pill">Drag tasks in to set priority</span>
-        </div>
-      </div>
-      <div class="bd matrix">
-        <div class="mx-hd">URGENT</div>
-        <div class="mx-hd">NOT URGENT</div>
-        <div id="Q11" class="quad" data-i="1" data-u="1"><div class="title">Important & Urgent (Do now)</div></div>
-        <div id="Q10" class="quad" data-i="1" data-u="0"><div class="title">Important & Not Urgent (Schedule)</div></div>
-        <div id="Q01" class="quad" data-i="0" data-u="1"><div class="title">Not Important & Urgent (Delegate)</div></div>
-        <div id="Q00" class="quad" data-i="0" data-u="0"><div class="title">Not Important & Not Urgent (Eliminate)</div></div>
-      </div>
-    </section>
+          <div class="filters">
+            <input id="search" class="input" placeholder="Search tasks" />
+            <select id="filterSection" class="input"></select>
+            <select id="filterStatus" class="input">
+              <option value="open">Open</option>
+              <option value="all">All</option>
+              <option value="done">Completed</option>
+              <option value="today">Today</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <select id="filterPriority" class="input">
+              <option value="all">All priority</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <select id="sortBy" class="input">
+              <option value="smart">Smart sort</option>
+              <option value="due">Due date</option>
+              <option value="priority">Priority</option>
+              <option value="created">Created</option>
+            </select>
+          </div>
 
-    <!-- Sections & Hydration -->
-    <div class="grid layout">
-      <section class="card section-list">
-        <div class="hd"><strong>Sections</strong><span class="pill">Custom areas (Work, Diet, College…)</span></div>
-        <div class="bd" id="sections"></div>
-        <div class="bd">
-          <div class="row">
-            <input id="newSectionName" class="input" placeholder="New section name" />
-            <button id="addSectionBtn" class="btn">Add Section</button>
+          <div id="taskList" class="task-list"></div>
+        </section>
+      </div>
+
+      <section class="panel insight-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Intelligence</p>
+            <h2>Suggested next moves</h2>
           </div>
         </div>
+        <div id="suggestions" class="suggestion-grid"></div>
       </section>
-      <section class="card">
-        <div class="hd"><strong>Hydration / Habit Reminders</strong><span class="pill">Simple interval alerts</span></div>
-        <div class="bd">
-          <div class="row">
-            <label class="pill">Water interval (mins)</label>
-            <input id="waterInterval" class="input" type="number" min="10" value="60" />
-            <button id="startWater" class="btn">Start</button>
-            <button id="stopWater" class="btn">Stop</button>
-            <span id="waterStatus" class="pill"></span>                                                             
+
+      <section class="panel community-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Community</p>
+            <h2>Verified workspace chat</h2>
           </div>
-          <div style="font-size:13px; color:var(--muted); margin-top:6px">Use this for diet mealtimes (as additional tasks) and regular hydration nudges every 1–2 hours.
+          <button id="screenShareBtn" class="btn ghost">Screen share</button>
+        </div>
+        <div id="communityMessages" class="community-messages"></div>
+        <div class="community-compose">
+          <input id="communityInput" class="input" maxlength="2000" placeholder="Share a blocker, update, or question" />
+          <button id="sendCommunityBtn" class="btn primary">Send</button>
+        </div>
+        <video id="screenPreview" class="screen-preview hidden" autoplay muted playsinline></video>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Reports</p>
+            <h2>Performance overview</h2>
+          </div>
+          <div class="toolbar">
+            <select id="reportRange" class="input compact">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+            <button id="downloadReportBtn" class="btn">Download</button>
+            <button id="emailReportBtn" class="btn ghost">Email</button>
           </div>
         </div>
+        <div id="reportCards" class="report-grid"></div>
       </section>
-    </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Schedule</p>
+            <h2>Calendar</h2>
+          </div>
+          <div class="cal-nav">
+            <button id="prevMonth" class="icon-btn" title="Previous month">&lt;</button>
+            <strong id="calLabel"></strong>
+            <button id="nextMonth" class="icon-btn" title="Next month">&gt;</button>
+          </div>
+        </div>
+        <div class="calendar">
+          <div class="cal-grid cal-head" id="calHead"></div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Prioritize</p>
+            <h2>Eisenhower matrix</h2>
+          </div>
+        </div>
+        <div class="matrix">
+          <div class="mx-hd">Urgent</div>
+          <div class="mx-hd">Not urgent</div>
+          <div id="Q11" class="quad" data-i="1" data-u="1"><div class="quad-title">Do now</div></div>
+          <div id="Q10" class="quad" data-i="1" data-u="0"><div class="quad-title">Schedule</div></div>
+          <div id="Q01" class="quad" data-i="0" data-u="1"><div class="quad-title">Delegate</div></div>
+          <div id="Q00" class="quad" data-i="0" data-u="0"><div class="quad-title">Eliminate</div></div>
+        </div>
+      </section>
+    </main>
   </div>
+
   <script type="module" src="../js/main.js"></script>
 </body>
 </html>

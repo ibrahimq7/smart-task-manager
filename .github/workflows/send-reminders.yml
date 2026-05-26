@@ -1,0 +1,29 @@
+name: Send Task Reminder Emails
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '18'
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+      - name: Run reminder sender
+        run: |
+          cd backend
+          npm run send-reminders
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          MAIL_PROVIDER: gmail
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

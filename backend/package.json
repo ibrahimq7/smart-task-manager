@@ -1,0 +1,13 @@
+{
+  "name": "smart-todo-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "send-reminders": "node sendReminders.js",
+    "test-email": "node testSendEmail.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "nodemailer": "^6.9.0"
+  }
+}
