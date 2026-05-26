@@ -5,7 +5,13 @@ const admin = initFirebaseAdmin();
 const db = admin.firestore();
 
 function formatDate(dateValue) {
-  const date = new Date(dateValue);
+  let date;
+  if (!dateValue) return 'No date set';
+  if (typeof dateValue?.toDate === 'function') {
+    date = dateValue.toDate();
+  } else {
+    date = new Date(dateValue);
+  }
   if (Number.isNaN(date.getTime())) return 'No date set';
   return date.toLocaleString('en-GB', {
     day: '2-digit',
@@ -37,20 +43,21 @@ async function loadUserEmail(userId) {
 }
 
 async function run() {
+  const nowTimestamp = admin.firestore.Timestamp.now();
   const nowISO = new Date().toISOString();
-  console.log('Reminder runner started at', nowISO);
+  console.log('Reminder runner started at', nowTimestamp.toDate().toISOString());
   // Build queries for pre-alerts and due-time alerts (and include legacy nextNotifyAt fallback)
   const now = Date.now();
   const preAlertQuery = db.collectionGroup('tasks')
     .where('completed', '==', false)
     .where('preAlertSent', '==', false)
-    .where('preAlertTime', '<=', nowISO)
+    .where('preAlertTime', '<=', nowTimestamp)
     .limit(200);
 
   const dueQuery = db.collectionGroup('tasks')
     .where('completed', '==', false)
     .where('dueSent', '==', false)
-    .where('dueTime', '<=', nowISO)
+    .where('dueTime', '<=', nowTimestamp)
     .limit(200);
 
   const legacyQuery = db.collectionGroup('tasks')
@@ -95,11 +102,18 @@ async function run() {
     }
 
     // Determine which notification to send
-    const preAlertTimeVal = task.preAlertTime ? new Date(task.preAlertTime).getTime() : null;
-    const dueTimeVal = task.dueTime ? new Date(task.dueTime).getTime() : null;
-    const shouldSendPreAlert = preAlertTimeVal && !task.preAlertSent && preAlertTimeVal <= now;
-    const shouldSendDue = dueTimeVal && !task.dueSent && dueTimeVal <= now;
-    const isLegacy = task.nextNotifyAt && !task.notifySent && new Date(task.nextNotifyAt).getTime() <= now;
+    const getTimeValue = (value) => {
+      if (!value) return null;
+      if (typeof value?.toMillis === 'function') return value.toMillis();
+      if (typeof value === 'number') return value;
+      return new Date(value).getTime();
+    };
+
+    const preAlertTimeVal = getTimeValue(task.preAlertTime);
+    const dueTimeVal = getTimeValue(task.dueTime);
+    const shouldSendPreAlert = preAlertTimeVal !== null && !task.preAlertSent && preAlertTimeVal <= now;
+    const shouldSendDue = dueTimeVal !== null && !task.dueSent && dueTimeVal <= now;
+    const isLegacy = task.nextNotifyAt && !task.notifySent && getTimeValue(task.nextNotifyAt) !== null && getTimeValue(task.nextNotifyAt) <= now;
 
     // If both pre-alert and due are due now, prefer sending the due notification and mark pre-alert sent to avoid duplicate emails
     if (shouldSendDue) {

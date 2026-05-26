@@ -61,10 +61,13 @@ npm install
    - Set the request URL to: `https://<your-deployment>/api/send-reminders`
    - Add the HTTP header: `x-scheduler-token: <your SCHEDULER_TOKEN>`
 
-6. (Optional) Test the API route manually:
+6. (Optional) Test the API routes manually:
 ```powershell
 # Call the test email route with the token
 curl -X POST "https://<your-deployment>/api/test-email?to=you@example.com&token=<SCHEDULER_TOKEN>"
+
+# Create a test Firestore task for end-to-end verification
+curl -X POST "https://<your-deployment>/api/create-test-task?uid=<userUid>&email=<userEmail>&dueMinutes=10&preAlertMinutes=5&token=<SCHEDULER_TOKEN>"
 ```
 
 Vercel will now run the scheduler regularly and send Gmail reminders using the serverless API route. No Firebase Cloud Functions or paid services are required.
@@ -73,8 +76,8 @@ Vercel will now run the scheduler regularly and send Gmail reminders using the s
 The backend scheduler lives in `backend/sendReminders.js`.
 It connects to Firestore, finds tasks with:
 - `completed == false`
-- `notifySent == false`
-- `nextNotifyAt <= now`
+- `preAlertSent == false` and `preAlertTime <= now` for pre-alert reminders
+- `dueSent == false` and `dueTime <= now` for due reminders
 
 Then it sends a Gmail notification containing:
 - Task title

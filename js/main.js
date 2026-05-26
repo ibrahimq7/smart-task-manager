@@ -10,6 +10,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  Timestamp,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -51,11 +52,18 @@ const state = {
   timers: { notify: {}, water: null }
 };
 
+function normalizeTimestamp(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value.toDate === 'function') return value.toDate().toISOString();
+  return new Date(value).toISOString();
+}
+
 function normalizeTask(task) {
   return {
     id: task.id || uid(),
     title: task.title || "Untitled task",
-    due: task.due || null,
+    due: normalizeTimestamp(task.due),
     section: task.section || "Inbox",
     category: task.category || "General",
     priority: legacyPriority(task),
@@ -107,14 +115,14 @@ async function syncAllTasksToCloud() {
   if (!user || !db) return;
   const batch = writeBatch(db);
   state.tasks.forEach((task) => {
-    // Compute pre-alert time (in ISO) and include dueTime for clarity
-    const dueTime = task.due || null;
-    const preAlertTime = (dueTime && Number.isFinite(Number(task.notify)))
-      ? new Date(new Date(dueTime).getTime() - Number(task.notify) * 60000).toISOString()
+    // Compute dueTime and preAlertTime as Firestore Timestamp objects
+    const dueTime = task.due ? Timestamp.fromDate(new Date(task.due)) : null;
+    const preAlertTime = (dueTime && Number.isFinite(Number(task.notify)) && Number(task.notify) > 0)
+      ? Timestamp.fromDate(new Date(new Date(task.due).getTime() - Number(task.notify) * 60000))
       : null;
-    // When saving/updating, reset the sent flags so updated tasks can re-trigger
-    const preAlertSent = task.preAlertSent === true ? false : false;
-    const dueSent = task.dueSent === true ? false : false;
+    // Reset sent flags on update so changed tasks can trigger again
+    const preAlertSent = false;
+    const dueSent = false;
     batch.set(doc(db, "users", user.uid, "tasks", task.id), {
       title: task.title,
       description: task.notes || "",

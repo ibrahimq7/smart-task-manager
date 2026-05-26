@@ -5,6 +5,24 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "completed", "order": "ASCENDING" },
+        { "fieldPath": "preAlertSent", "order": "ASCENDING" },
+        { "fieldPath": "preAlertTime", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "completed", "order": "ASCENDING" },
+        { "fieldPath": "dueSent", "order": "ASCENDING" },
+        { "fieldPath": "dueTime", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "completed", "order": "ASCENDING" },
         { "fieldPath": "nextNotifyAt", "order": "ASCENDING" },
         { "fieldPath": "notifySent", "order": "ASCENDING" }
       ]
